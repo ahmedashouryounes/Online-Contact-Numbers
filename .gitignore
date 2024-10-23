@@ -6,3 +6,6 @@
 
 /online-contact-numbers-be/node_modules
 /online-contact-numbers-be/package-lock.json
+
+.env
+!.env.example
