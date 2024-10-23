@@ -1,0 +1,8 @@
+/online-contact-numbers-fe/node_modules
+/online-contact-numbers-fe/dist
+/online-contact-numbers-fe/package-lock.json
+/online-contact-numbers-fe/.vscode/*
+/online-contact-numbers-fe/.angular/cache
+
+/online-contact-numbers-be/node_modules
+/online-contact-numbers-be/package-lock.json
