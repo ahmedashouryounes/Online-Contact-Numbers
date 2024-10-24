@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -12,8 +12,8 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
-  loginForm: FormGroup;
+export class LoginComponent implements OnInit  {
+  loginForm!: FormGroup;
   isLoading = false;
   submitted = false;
   showPassword = false;
@@ -24,6 +24,14 @@ export class LoginComponent {
     private router: Router,
     private toast: ToastrService
   ) {
+
+  }
+
+  ngOnInit(): void {
+    this.formInit()
+  }
+
+  formInit(){
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]]
@@ -43,18 +51,15 @@ export class LoginComponent {
 
     if (this.loginForm.valid) {
       this.isLoading = true;
-      const { username, password } = this.loginForm.value;
 
-      this.authService.login(username, password).subscribe({
-        next: (response) => {
+      this.authService.login(this.loginForm.value).subscribe({
+        next: () => {
           this.toast.success('Login successful!', 'Success');
           this.router.navigate(['/contacts']);
         },
         error: (err) => {
           this.isLoading = false;
-          this.toast.error(err.error?.message || 'Login failed', 'Error', {
-            positionClass: 'toast-top-right'
-          });
+          this.toast.error(err.error?.message || 'Login failed', 'Error');
         },
         complete: () => {
           this.isLoading = false;

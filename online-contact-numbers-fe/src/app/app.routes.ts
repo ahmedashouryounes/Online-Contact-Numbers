@@ -7,7 +7,7 @@ export const routes: Routes = [
     {
         path: 'contacts',
         loadComponent: () => import('./features/contacts/contacts.component'),
-        // loadChildren: () => import('./features/contacts/contacts.routes'),
+        loadChildren: () => import('./features/contacts/contacts.routes'),
         canActivate: [AuthGuard]
     },
     { path: '', redirectTo: '/contacts', pathMatch: 'full' },

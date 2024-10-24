@@ -24,8 +24,8 @@ export class AuthService {
     private router: Router
   ) { }
 
-  login(username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, { username, password })
+  login(loginForm:any): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, loginForm)
       .pipe(
         tap(response => {
           this.setToken(response.token);

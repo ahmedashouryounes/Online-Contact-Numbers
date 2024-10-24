@@ -3,7 +3,6 @@ const router = express.Router();
 const Contact = require('../../models/contact.model');
 const { authenticateToken } = require('../../middleware/auth.middleware');
 
-// Get contacts with pagination and filters
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -31,7 +30,6 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Create contact
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const contact = new Contact(req.body);
@@ -42,7 +40,6 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Update contact
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
@@ -63,7 +60,21 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Delete contact
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const contact = await Contact.findById(req.params.id);
+    
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact not found' });
+    }
+
+    res.json(contact);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
@@ -79,7 +90,6 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Lock contact
 router.post('/:id/lock', authenticateToken, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
@@ -101,7 +111,6 @@ router.post('/:id/lock', authenticateToken, async (req, res) => {
   }
 });
 
-// Unlock contact
 router.post('/:id/unlock', authenticateToken, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
