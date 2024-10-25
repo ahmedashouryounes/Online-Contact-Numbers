@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, RouterOutlet } from '@angular/router';
 import { NgIf } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-contacts',
   standalone: true,
-  imports: [RouterOutlet, NgIf],
+  imports: [RouterOutlet, NgIf, MatIconModule],
   templateUrl: './contacts.component.html',
   styleUrl: './contacts.component.css'
 })

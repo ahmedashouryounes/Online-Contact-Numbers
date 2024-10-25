@@ -48,7 +48,6 @@ export default class ContactsListComponent implements OnInit {
     this.contactsService.getContacts(this.page).subscribe({
       next: (res) => {
         this.contacts = res.contacts;
-        this.page = res.page;
         this.total = res.total;
       },
       error: (err) => {
@@ -89,5 +88,9 @@ export default class ContactsListComponent implements OnInit {
   onPageChange(event: PageEvent): void {
     this.page = event.pageIndex+1;
     this.getContacts();
+  }
+
+  trackByContactId(index: number, contact: IContact): string {
+    return contact._id!;
   }
 }

@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
 export default class ContactsFormComponent implements OnInit {
   contactForm!: FormGroup;
   contactId: string | null = null;
-  oldContact : any = {
+  oldContact : IContact = {
     name: '',
     phone: '',
     address: '',
@@ -71,9 +71,9 @@ export default class ContactsFormComponent implements OnInit {
     });
   }
 
-  fillOldContact(contact:any){
-    for(let filed of Object.keys(this.oldContact)){
-      this.oldContact[filed] = contact[filed]
+  fillOldContact(contact: IContact) {
+    for (let field of Object.keys(this.oldContact) as (keyof IContact)[]) {
+      this.oldContact[field] = contact[field]!;
     }
   }
 
