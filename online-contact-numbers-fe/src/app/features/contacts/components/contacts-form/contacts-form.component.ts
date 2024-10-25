@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContactService } from '../../services/contact.service';
 import { ToastrService } from 'ngx-toastr';
-import { IContact } from '../../contact.intterface';
+import { IContact } from '../../contact.interface';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,6 +16,12 @@ import { CommonModule } from '@angular/common';
 export default class ContactsFormComponent implements OnInit {
   contactForm!: FormGroup;
   contactId: string | null = null;
+  oldContact : any = {
+    name: '',
+    phone: '',
+    address: '',
+    notes: ''
+  }
   isEditMode = false;
   isLoading = false;
   submitted = false;
@@ -55,6 +61,7 @@ export default class ContactsFormComponent implements OnInit {
   getContact(id: string): void {
     this.contactsService.getContactById(id).subscribe({
       next: (contact: IContact) => {
+        this.fillOldContact(contact);
         this.contactForm.patchValue(contact);
       },
       error: (err: any) => {
@@ -64,18 +71,30 @@ export default class ContactsFormComponent implements OnInit {
     });
   }
 
+  fillOldContact(contact:any){
+    for(let filed of Object.keys(this.oldContact)){
+      this.oldContact[filed] = contact[filed]
+    }
+  }
+
   onSubmit(): void {
     this.submitted = true;
 
     if (this.contactForm.valid) {
       this.isLoading = true;
       if (this.isEditMode) {
+        if(JSON.stringify(this.oldContact) == JSON.stringify(this.contactForm.getRawValue())){
+          this.toast.warning('You never change any field', 'Warning'); 
+          this.isLoading = false;
+          return;
+        }
         this.contactsService.updateContact(this.contactId!, this.contactForm.value).subscribe({
           next: () => {
             this.router.navigate(['/contacts']);
             this.toast.success('Contact Updated Successfully!', 'Success');
           },
           error: (err) => {
+            this.isLoading = false;
             this.toast.error(err.error?.message || 'Updated failed', 'Error');
           },
           complete: () => {
@@ -90,6 +109,7 @@ export default class ContactsFormComponent implements OnInit {
             this.toast.success('Contact Added Successfully!', 'Success');
           },
           error: (err) => {
+            this.isLoading = false;
             this.toast.error(err.error?.message || 'Added failed', 'Error');
           },
           complete: () => {

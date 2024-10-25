@@ -8,4 +8,5 @@
 /online-contact-numbers-be/package-lock.json
 
 .env
+.hintrc
 !.env.example

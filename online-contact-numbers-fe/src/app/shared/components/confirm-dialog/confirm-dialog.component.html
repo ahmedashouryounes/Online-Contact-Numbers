@@ -1,0 +1,10 @@
+<div class="card p-3">
+    <h1 mat-dialog-title class="text-center">Confirm Deletion</h1>
+<div mat-dialog-content class="dialog-content">
+    <p>Are you sure you want to delete <strong>{{ data.name }}</strong>?</p>
+</div>
+<div mat-dialog-actions class="dialog-actions">
+    <button mat-button color="warn" (click)="dialogRef.close(false)">Cancel</button>
+    <button mat-button color="primary" (click)="dialogRef.close(true)">Delete</button>
+</div>
+</div>

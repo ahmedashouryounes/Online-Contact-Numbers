@@ -6,6 +6,7 @@ import { ToastrModule, provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { AuthGuard } from './core/guards/auth.guard';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     importProvidersFrom(ToastrModule.forRoot({
       positionClass: 'toast-top-right'
-    }))
+    })), provideAnimationsAsync()
   ]
 };
 

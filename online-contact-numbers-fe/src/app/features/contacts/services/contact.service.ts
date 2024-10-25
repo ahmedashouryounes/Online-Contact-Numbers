@@ -11,18 +11,10 @@ export class ContactService {
 
   constructor(
     private http: HttpClient,
-  ) {}
+  ) { }
 
-  getContacts(page: number, filters: any = {}): Observable<any> {
-    let params = new HttpParams()
-      .set('page', page.toString());
-    
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) {
-        params = params.set(key, filters[key]);
-      }
-    });
-
+  getContacts(page: number): Observable<any> {
+    let params = new HttpParams().set('page', page.toString());
     return this.http.get(`${this.apiUrl}/contacts`, { params });
   }
 
@@ -51,11 +43,11 @@ export class ContactService {
   //   return this.http.post(`${this.apiUrl}/contacts/${id}/unlock`, {});
   // }
 
-//   onContactLocked(): Observable<string> {
-//     return this.socket.fromEvent<string>('contactLocked');
-//   }
+  //   onContactLocked(): Observable<string> {
+  //     return this.socket.fromEvent<string>('contactLocked');
+  //   }
 
-//   onContactUnlocked(): Observable<string> {
-//     return this.socket.fromEvent<string>('contactUnlocked');
-//   }
+  //   onContactUnlocked(): Observable<string> {
+  //     return this.socket.fromEvent<string>('contactUnlocked');
+  //   }
 }
