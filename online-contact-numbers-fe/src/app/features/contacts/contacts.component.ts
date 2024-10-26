@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, RouterOutlet } from '@angular/router';
 import { NgIf } from '@angular/common';
@@ -11,28 +11,35 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './contacts.component.html',
   styleUrl: './contacts.component.css'
 })
-export default class ContactsComponent {
+export default class ContactsComponent implements OnInit{
+  user :string = "";
 
   constructor(
     private authService: AuthService,
     private router: Router,
   ) { }
 
+  ngOnInit(){
+    this.getUser();
+  }
 
+  getUser(): void{
+    this.user = this.authService.getUser();
+  }
 
-  addContact(){
+  addContact(): void{
     this.router.navigate(['contacts/form']);
   }
 
-  backToList(){
+  backToList(): void{
     this.router.navigate(['contacts']);
   }
 
-  logout() {
+  logout() : void{
     this.authService.logout()
   }
 
-  getPathName() {
+  getPathName() :string{
     return window.location.href;
   }
 }

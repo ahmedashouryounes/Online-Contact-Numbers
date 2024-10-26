@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Contact = require("../../models/contact.model");
 const { authenticateToken } = require("../../middleware/auth.middleware");
+const { getIO } = require("../../socket");
+
 
 router.get("/", authenticateToken, async (req, res) => {
   try {
@@ -111,7 +113,17 @@ router.post("/:id/lock", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
+    setImmediate(async()=>{
+      await Contact.findByIdAndUpdate(req.params.id, {locked: false});
+      getIO().emit('contactUnlocked', {
+        contactId: req.params.id,
+      });
+    },2*60*1000)
+
     await Contact.findByIdAndUpdate(req.params.id, {locked: true});
+    getIO().emit('contactLocked', {
+      contactId: req.params.id
+    });
     res.json(contact);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -126,6 +138,9 @@ router.post("/:id/unlock", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
     await Contact.findByIdAndUpdate(req.params.id, {locked: false});
+    getIO().emit('contactUnlocked', {
+      contactId: req.params.id,
+    });
 
     res.json(contact);
   } catch (error) {

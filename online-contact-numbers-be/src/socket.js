@@ -1,7 +1,8 @@
 const { Server } = require('socket.io');
+let io;
 
 function initializeSocket(server) {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: "http://localhost:4200",
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
@@ -27,4 +28,11 @@ function initializeSocket(server) {
   return io;
 }
 
-module.exports = { initializeSocket };
+function getIO() {
+  if (!io) {
+    throw new Error('Socket.io not initialized!');
+  }
+  return io;
+}
+
+module.exports = { initializeSocket, getIO };
