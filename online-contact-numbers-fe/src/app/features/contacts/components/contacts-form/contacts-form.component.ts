@@ -1,22 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContactService } from '../../services/contact.service';
 import { ToastrService } from 'ngx-toastr';
 import { IContact } from '../../contact.interface';
 import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-contacts-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatProgressSpinnerModule],
   templateUrl: './contacts-form.component.html',
   styleUrl: './contacts-form.component.css'
 })
-export default class ContactsFormComponent implements OnInit {
+export default class ContactsFormComponent implements OnInit, OnDestroy {
   contactForm!: FormGroup;
   contactId: string | null = null;
-  oldContact : IContact = {
+  oldContact: IContact = {
     name: '',
     phone: '',
     address: '',
@@ -25,6 +26,8 @@ export default class ContactsFormComponent implements OnInit {
   isEditMode = false;
   isLoading = false;
   submitted = false;
+  timer: number = 120;
+  interval: any;
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +44,8 @@ export default class ContactsFormComponent implements OnInit {
       if (this.contactId) {
         this.isEditMode = true;
         this.getContact(this.contactId);
+        this.lockContact(this.contactId);
+        this.startTimer();
       }
     });
   }
@@ -71,10 +76,11 @@ export default class ContactsFormComponent implements OnInit {
     });
   }
 
-  fillOldContact(contact: IContact) {
-    for (let field of Object.keys(this.oldContact) as (keyof IContact)[]) {
-      this.oldContact[field] = contact[field]!;
-    }
+  fillOldContact(contact: IContact): void {
+    this.oldContact["name"] = contact["name"];
+    this.oldContact["phone"] = contact["phone"];
+    this.oldContact["address"] = contact["address"];
+    this.oldContact["notes"] = contact["notes"];
   }
 
   onSubmit(): void {
@@ -83,8 +89,8 @@ export default class ContactsFormComponent implements OnInit {
     if (this.contactForm.valid) {
       this.isLoading = true;
       if (this.isEditMode) {
-        if(JSON.stringify(this.oldContact) == JSON.stringify(this.contactForm.getRawValue())){
-          this.toast.warning('You never change any field', 'Warning'); 
+        if (JSON.stringify(this.oldContact) == JSON.stringify(this.contactForm.getRawValue())) {
+          this.toast.warning('You never change any field', 'Warning');
           this.isLoading = false;
           return;
         }
@@ -119,4 +125,51 @@ export default class ContactsFormComponent implements OnInit {
       }
     } else { this.toast.warning('Please fill in all required fields', 'Warning'); }
   }
+
+  lockContact(id: string): void {
+    this.contactsService.lockContact(id).subscribe({
+      next: () => {
+        this.toast.warning('Contact will locked for 2 Minute', 'Warning');
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Can\'t locked this contact', 'Error');
+      }
+    })
+  }
+
+  unlockContact(id: string): void {
+    this.contactsService.unlockContact(id).subscribe({
+      next: () => {
+        this.toast.warning('Contact will unlocked', 'Warning');
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Can\'t unlocked this contact', 'Error');
+      }
+    });
+  }
+
+  startTimer(): void {
+    this.interval = setInterval(() => {
+      this.timer--;
+      if (this.timer <= 0) {
+        clearInterval(this.interval);
+        this.unlockContact(this.contactId || "");
+        this.router.navigate(['/contacts']);
+      }
+    }, 1000);
+  }
+
+  formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  ngOnDestroy(): void {
+    if (this.contactId) {
+      clearInterval(this.interval);
+      this.unlockContact(this.contactId || "");
+    }
+  }
+
 }

@@ -1,3 +1,7 @@
+<div *ngIf="contactId" class="timer">
+    <mat-progress-spinner mode="determinate" [value]="(timer / 120) * 100"></mat-progress-spinner>
+    <p class="time">{{ formatTime(timer) }}</p>
+</div>
 <div class="container d-flex align-items-center justify-content-center">
     <div class="card shadow border-0 w-100">
         <div class="card-body p-5">

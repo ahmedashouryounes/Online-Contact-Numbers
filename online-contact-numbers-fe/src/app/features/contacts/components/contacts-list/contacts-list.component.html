@@ -11,9 +11,9 @@
                     <p><strong class="me-3">Notes:</strong> {{ contact.notes }}</p>
                 </div>
                 <div class="action-buttons">
-                    <button mat-flat-button color="primary" class="edit-button"
+                    <button [disabled]="contact.locked" mat-flat-button color="primary" class="edit-button"
                         (click)="editContact(contact)">Edit</button>
-                    <button mat-mini-fab color="warn" (click)="confirmDelete(contact)">
+                    <button [disabled]="contact.locked" mat-mini-fab color="warn" (click)="confirmDelete(contact)">
                         <mat-icon>delete</mat-icon>
                     </button>
                 </div>

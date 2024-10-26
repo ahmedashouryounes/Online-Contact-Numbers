@@ -35,19 +35,11 @@ export class ContactService {
     return this.http.delete(`${this.apiUrl}/contacts/${id}`);
   }
 
-  // lockContact(id: string): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/contacts/${id}/lock`, {});
-  // }
+  lockContact(id: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/contacts/${id}/lock`, {});
+  }
 
-  // unlockContact(id: string): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/contacts/${id}/unlock`, {});
-  // }
-
-  //   onContactLocked(): Observable<string> {
-  //     return this.socket.fromEvent<string>('contactLocked');
-  //   }
-
-  //   onContactUnlocked(): Observable<string> {
-  //     return this.socket.fromEvent<string>('contactUnlocked');
-  //   }
+  unlockContact(id: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/contacts/${id}/unlock`, {});
+  }
 }

@@ -78,6 +78,10 @@ router.get("/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
+    if (contact.locked) {
+      return res.status(404).json({ message: "Contact locked for now" });
+    }
+
     res.json(contact);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -101,21 +105,13 @@ router.delete("/:id", authenticateToken, async (req, res) => {
 
 router.post("/:id/lock", authenticateToken, async (req, res) => {
   try {
-    const contact = await Contact.findById(req.params.id);
+    const contact = await Contact.findById(req.params.id).lean();
 
     if (!contact) {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    if (contact.lockedBy && contact.lockedBy !== req.user.username) {
-      return res
-        .status(423)
-        .json({ message: "Contact is already locked by another user" });
-    }
-
-    contact.lockedBy = req.user.username;
-    contact.lockedAt = new Date();
-    await contact.save();
+    await Contact.findByIdAndUpdate(req.params.id, {locked: true});
     res.json(contact);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -124,17 +120,12 @@ router.post("/:id/lock", authenticateToken, async (req, res) => {
 
 router.post("/:id/unlock", authenticateToken, async (req, res) => {
   try {
-    const contact = await Contact.findById(req.params.id);
+    const contact = await Contact.findById(req.params.id).lean();
 
     if (!contact) {
       return res.status(404).json({ message: "Contact not found" });
     }
-
-    if (contact.lockedBy === req.user.username) {
-      contact.lockedBy = null;
-      contact.lockedAt = null;
-      await contact.save();
-    }
+    await Contact.findByIdAndUpdate(req.params.id, {locked: false});
 
     res.json(contact);
   } catch (error) {

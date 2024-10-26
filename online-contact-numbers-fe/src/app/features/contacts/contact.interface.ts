@@ -4,4 +4,5 @@ export interface IContact {
     phone: string;
     address: string;
     notes: string;
+    locked?: boolean;
 }

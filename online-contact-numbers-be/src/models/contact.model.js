@@ -7,17 +7,14 @@ const contactSchema = new mongoose.Schema({
   },
   phone: { 
     type: String, 
-    required: true 
+    required: true,
+    unique: true
   },
   address: String,
   notes: String,
-  lockedBy: { 
-    type: String, 
-    default: null 
-  },
-  lockedAt: { 
-    type: Date, 
-    default: null 
+  locked: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
