@@ -59,13 +59,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    if (contact.lockedBy && contact.lockedBy !== req.user.username) {
-      return res
-        .status(423)
-        .json({ message: "Contact is locked by another user" });
-    }
-
-    await Contact.findByIdAndUpdate(req.params.id, contact)
+    await Contact.findByIdAndUpdate(req.params.id, req.body)
     res.json(contact);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -98,7 +92,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    await contact.deleteOne();
+    await Contact.findByIdAndDelete(req.params.id);
     res.json({ message: "Contact deleted successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -113,18 +107,20 @@ router.post("/:id/lock", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    setImmediate(async()=>{
+    await Contact.findByIdAndUpdate(req.params.id, {locked: true}, {new: true}).lean();
+
+    getIO().emit('contactLocked', {
+      contactId: req.params.id
+    });
+
+    setTimeout(async()=>{
       await Contact.findByIdAndUpdate(req.params.id, {locked: false});
       getIO().emit('contactUnlocked', {
         contactId: req.params.id,
       });
-    },2*60*1000)
+    },2*60*1000);
 
-    await Contact.findByIdAndUpdate(req.params.id, {locked: true});
-    getIO().emit('contactLocked', {
-      contactId: req.params.id
-    });
-    res.json(contact);
+    res.json({ message: "Contact locked successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -137,12 +133,14 @@ router.post("/:id/unlock", authenticateToken, async (req, res) => {
     if (!contact) {
       return res.status(404).json({ message: "Contact not found" });
     }
-    await Contact.findByIdAndUpdate(req.params.id, {locked: false});
+
+    await Contact.findByIdAndUpdate(req.params.id, {locked: false}, {new: true}).lean();
+
     getIO().emit('contactUnlocked', {
       contactId: req.params.id,
     });
 
-    res.json(contact);
+    res.json({ message: "Contact unlocked successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
