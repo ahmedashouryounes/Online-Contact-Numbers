@@ -4,21 +4,18 @@ const Contact = require("../../models/contact.model");
 const { authenticateToken } = require("../../middleware/auth.middleware");
 const { getIO } = require("../../socket");
 
-
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
 
-    const total = await Contact.countDocuments();
-    if (page > Math.ceil(total / limit)) {
-      return res.status(404).json({ message: "Invalid Page" });
-    }
     const contacts = await Contact.find()
       .lean()
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 });
+
+    const total = await Contact.countDocuments();
 
     res.json({
       contacts,
@@ -32,7 +29,7 @@ router.get("/", authenticateToken, async (req, res) => {
 
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    const existContact = await Contact.findOne({phone:req.body.phone});
+    const existContact = await Contact.findOne({ phone: req.body.phone });
 
     if (existContact) {
       return res.status(404).json({ message: "Phone exist already" });
@@ -40,6 +37,9 @@ router.post("/", authenticateToken, async (req, res) => {
 
     const contact = new Contact(req.body);
     await contact.save();
+
+    getIO().emit("refreshData");
+
     res.status(201).json(contact);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -49,9 +49,11 @@ router.post("/", authenticateToken, async (req, res) => {
 router.put("/:id", authenticateToken, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id).lean();
-    const existContact = await Contact.findOne({phone:req.body.phone}).lean();
+    const existContact = await Contact.findOne({
+      phone: req.body.phone,
+    }).lean();
 
-    if (existContact._id.toString() != contact._id.toString()) {
+    if (existContact && existContact._id.toString() != contact._id.toString()) {
       return res.status(404).json({ message: "Phone exist already" });
     }
 
@@ -59,7 +61,10 @@ router.put("/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    await Contact.findByIdAndUpdate(req.params.id, req.body)
+    await Contact.findByIdAndUpdate(req.params.id, req.body);
+
+    getIO().emit("refreshData");
+
     res.json(contact);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -93,6 +98,9 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     }
 
     await Contact.findByIdAndDelete(req.params.id);
+
+    getIO().emit("refreshData");
+
     res.json({ message: "Contact deleted successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -107,18 +115,18 @@ router.post("/:id/lock", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    await Contact.findByIdAndUpdate(req.params.id, {locked: true}, {new: true}).lean();
+    await Contact.findByIdAndUpdate(
+      req.params.id,
+      { locked: true },
+      { new: true }
+    ).lean();
 
-    getIO().emit('contactLocked', {
-      contactId: req.params.id
-    });
+    getIO().emit("refreshData");
 
-    setTimeout(async()=>{
-      await Contact.findByIdAndUpdate(req.params.id, {locked: false});
-      getIO().emit('contactUnlocked', {
-        contactId: req.params.id,
-      });
-    },2*60*1000);
+    setTimeout(async () => {
+      await Contact.findByIdAndUpdate(req.params.id, { locked: false });
+      getIO().emit("refreshData");
+    }, 2 * 60 * 1000);
 
     res.json({ message: "Contact locked successfully" });
   } catch (error) {
@@ -134,11 +142,13 @@ router.post("/:id/unlock", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Contact not found" });
     }
 
-    await Contact.findByIdAndUpdate(req.params.id, {locked: false}, {new: true}).lean();
+    await Contact.findByIdAndUpdate(
+      req.params.id,
+      { locked: false },
+      { new: true }
+    ).lean();
 
-    getIO().emit('contactUnlocked', {
-      contactId: req.params.id,
-    });
+    getIO().emit("refreshData");
 
     res.json({ message: "Contact unlocked successfully" });
   } catch (error) {

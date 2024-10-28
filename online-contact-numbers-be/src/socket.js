@@ -12,12 +12,8 @@ function initializeSocket(server) {
   io.on('connection', (socket) => {
     console.log('Client connected');
 
-    socket.on('contactLocked', (data) => {
-      socket.broadcast.emit('contactLocked', data);
-    });
-
-    socket.on('contactUnlocked', (data) => {
-      socket.broadcast.emit('contactUnlocked', data);
+    socket.on('refreshData', (data) => {
+      socket.broadcast.emit('refreshData');
     });
 
     socket.on('disconnect', () => {

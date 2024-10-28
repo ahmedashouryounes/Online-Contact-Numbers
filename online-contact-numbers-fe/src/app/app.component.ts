@@ -20,11 +20,7 @@ export class AppComponent implements OnDestroy {
   }
 
   handleSocketListeners(): void {
-    this.socket.on('contactLocked', (data: any) => {
-      this.contactsService.newChanges.next(1);
-    });
-
-    this.socket.on('contactUnlocked', (data: any) => {
+    this.socket.on('refreshData', () => {
       this.contactsService.newChanges.next(1);
     });
   }

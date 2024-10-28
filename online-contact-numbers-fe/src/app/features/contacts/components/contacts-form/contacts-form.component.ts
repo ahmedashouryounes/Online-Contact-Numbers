@@ -24,6 +24,7 @@ export default class ContactsFormComponent implements OnInit, OnDestroy {
     notes: ''
   }
   isEditMode = false;
+  contactLocked = false;
   isLoading = false;
   submitted = false;
   timer: number = 120;
@@ -44,8 +45,6 @@ export default class ContactsFormComponent implements OnInit, OnDestroy {
       if (this.contactId) {
         this.isEditMode = true;
         this.getContact(this.contactId);
-        this.lockContact(this.contactId);
-        this.startTimer();
       }
     });
   }
@@ -68,6 +67,7 @@ export default class ContactsFormComponent implements OnInit, OnDestroy {
       next: (contact: IContact) => {
         this.fillOldContact(contact);
         this.contactForm.patchValue(contact);
+        this.lockContact(id);
       },
       error: (err: any) => {
         this.router.navigate(['/contacts']);
@@ -129,6 +129,8 @@ export default class ContactsFormComponent implements OnInit, OnDestroy {
   lockContact(id: string): void {
     this.contactsService.lockContact(id).subscribe({
       next: () => {
+        this.contactLocked = true;
+        this.startTimer();
         this.toast.warning('Contact will locked for 2 Minute', 'Warning');
       },
       error: (err) => {
@@ -166,7 +168,7 @@ export default class ContactsFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.contactId) {
+    if (this.contactId && this.contactLocked) {
       clearInterval(this.interval);
       this.unlockContact(this.contactId || "");
     }
