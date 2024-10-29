@@ -120,8 +120,7 @@ Online Contact Numbers/
     │   │   │   ├── interceptors/
     │   │   │   │   └── auth.interceptor.ts
     │   │   │   └── services/
-    │   │   │       ├── auth.service.ts
-    │   │   │       └── socket.service.ts
+    │   │   │       └── auth.service.ts
     │   │   ├── features/
     │   │   │   └── contacts/
     │   │   │       ├── components/
